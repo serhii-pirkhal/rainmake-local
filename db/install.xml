@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/rainmake_backend/db" VERSION="2025063001" COMMENT="Rainmake Backend tables">
+    <TABLES>
+
+        <TABLE NAME="local_rainmake_backend_coursemeta" COMMENT="Additional course data">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" UNIQUE="true"/>
+                <FIELD NAME="topic" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="language" TYPE="char" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="subtitlelanguage" TYPE="char" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="level" TYPE="char" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="duration" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="description" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="will_teach" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="target" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="welcome" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="congrats" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="requirements" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+            </KEYS>
+        </TABLE>
+
+        <TABLE NAME="local_rainmake_backend_sessions" COMMENT="Course sessions">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+            </KEYS>
+        </TABLE>
+
+        <TABLE NAME="local_rainmake_backend_lectures" COMMENT="Session lectures">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="sessionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="type" TYPE="char" LENGTH="50" NOTNULL="true"/>
+                <FIELD NAME="description" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="notes" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="sessionfk" TYPE="foreign" FIELDS="sessionid" REFTABLE="local_rainmake_backend_sessions" REFFIELDS="id"/>
+            </KEYS>
+        </TABLE>
+
+        <TABLE NAME="local_rainmake_backend_lecture_video" COMMENT="Video content for a lecture">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="lectureid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Reference to lecture"/>
+                <FIELD NAME="filename" TYPE="char" LENGTH="255" NOTNULL="false"/>
+                <FIELD NAME="duration" TYPE="int" LENGTH="10" NOTNULL="false" COMMENT="Duration in seconds"/>
+                <FIELD NAME="thumbnail" TYPE="char" LENGTH="255" NOTNULL="false" COMMENT="URL to thumbnail image"/>
+                <FIELD NAME="url" TYPE="char" LENGTH="255" NOTNULL="false" COMMENT="Direct URL to video file"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false"/>
+            </FIELDS>
+
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="lecturefk" TYPE="foreign" FIELDS="lectureid" REFTABLE="local_rainmake_backend_lectures" REFFIELDS="id"/>
+            </KEYS>
+
+            <INDEXES>
+                <INDEX NAME="lectureid_idx" UNIQUE="false" FIELDS="lectureid"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_rainmake_backend_lecture_files" COMMENT="Attached files for a lecture">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="lectureid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Reference to lecture"/>
+                <FIELD NAME="filename" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="filepath" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Full path or Moodle filearea reference"/>
+                <FIELD NAME="filesize" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="mimetype" TYPE="char" LENGTH="100" NOTNULL="false"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false"/>
+            </FIELDS>
+
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="lecturefk" TYPE="foreign" FIELDS="lectureid" REFTABLE="local_rainmake_backend_lectures" REFFIELDS="id"/>
+            </KEYS>
+
+            <INDEXES>
+                <INDEX NAME="lectureid_idx" UNIQUE="false" FIELDS="lectureid"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_rainmake_backend_lecture_views" COMMENT="Stores lecture views by users">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Primary key"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="User who viewed the lecture"/>
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Viewed course ID"/>
+                <FIELD NAME="sessionid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Viewed session ID"/>
+                <FIELD NAME="lectureid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Viewed lecture ID"/>
+                <FIELD NAME="viewed_at" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Timestamp of viewing"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="unique_user_lecture" TYPE="unique" FIELDS="userid,lectureid"/>
+                <KEY NAME="fk_user" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+                <KEY NAME="fk_lecture" TYPE="foreign" FIELDS="lectureid" REFTABLE="local_rainmake_backend_lectures" REFFIELDS="id"/>
+                <KEY NAME="fk_course" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+                <KEY NAME="fk_session" TYPE="foreign" FIELDS="sessionid" REFTABLE="local_rainmake_backend_sessions" REFFIELDS="id"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="assignment_tasks" COMMENT="Tasks linked to courses">
+            <FIELDS>
+                <FIELD NAME="id"         TYPE="int"    LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="name"       TYPE="char"   LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="course_id"  TYPE="int"    LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="feedback"   TYPE="text"                   NOTNULL="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="fk_course" TYPE="foreign"
+                     FIELDS="course_id" REFTABLE="course" REFFIELDS="id"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="assignment_tasks_files" COMMENT="File paths for each task">
+            <FIELDS>
+                <FIELD NAME="id"      TYPE="int"    LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="task_id" TYPE="int"    LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="filepath" TYPE="text"                  NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="fk_task" TYPE="foreign"
+                     FIELDS="task_id" REFTABLE="assignment_tasks" REFFIELDS="id"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="assignment_tasks_students" COMMENT="Students assigned to tasks">
+            <FIELDS>
+                <FIELD NAME="id"      TYPE="int"    LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="task_id" TYPE="int"    LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="user_id" TYPE="int"    LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary"    TYPE="primary" FIELDS="id"/>
+                <KEY NAME="fk_task"    TYPE="foreign" FIELDS="task_id"
+                     REFTABLE="assignment_tasks" REFFIELDS="id"/>
+                <KEY NAME="fk_user"    TYPE="foreign" FIELDS="user_id"
+                     REFTABLE="user" REFFIELDS="id"/>
+            </KEYS>
+        </TABLE>
+    </TABLES>
+</XMLDB>
