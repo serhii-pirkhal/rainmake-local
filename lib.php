@@ -12,7 +12,7 @@ function local_rainmake_backend_pluginfile($course, $cm, $context, $filearea, $a
     $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
 
     if ($filearea === 'courseimage' || $filearea === 'lecture_video' || $filearea === 'lecture_file') {
-        $file = $fs->get_file($context->id, 'local_rainmake', $filearea, $itemid, $filepath, $filename);
+        $file = $fs->get_file($context->id, 'local_rainmake_backend', $filearea, $itemid, $filepath, $filename);
 
         if (!$file || $file->is_directory()) {
             return false;
