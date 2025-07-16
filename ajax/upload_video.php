@@ -5,6 +5,7 @@ require_login();
 require_sesskey();
 
 $lectureid = required_param('lectureid', PARAM_INT);
+$duration = required_param('duration', PARAM_INT);
 
 if (!isset($_FILES['videofile'])) {
     echo json_encode(['success' => false, 'message' => 'No file uploaded']);
@@ -38,8 +39,6 @@ $fileurl = moodle_url::make_pluginfile_url(
     $storedfile->get_filepath(),
     $storedfile->get_filename()
 )->out(false);
-
-$duration = null;
 
 $thumbnail = null;
 
