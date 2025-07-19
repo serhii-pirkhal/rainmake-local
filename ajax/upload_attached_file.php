@@ -22,12 +22,10 @@ if ($file['size'] > 100 * 1024 * 1024) {
 $fs = get_file_storage();
 $context = context_system::instance();
 
-$fs->delete_area_files($context->id, 'local_rainmake_backend', 'lecture_file', $lectureid);
-
 $file_record = [
     'contextid' => $context->id,
     'component' => 'local_rainmake_backend',
-    'filearea'  => 'lecture_file',
+    'filearea'  => 'lecture_files',
     'itemid'    => $lectureid,
     'filepath'  => '/',
     'filename'  => $filename
@@ -48,6 +46,18 @@ $fileurl = moodle_url::make_pluginfile_url(
     $storedfile->get_filepath(),
     $storedfile->get_filename()
 )->out(false);
+
+
+$record = (object)[
+    'lectureid'   => $lectureid,
+    'filename'    => $storedfile->get_filename(),
+    'filepath'    => $storedfile->get_filepath(),
+    'filesize'    => $storedfile->get_filesize(),
+    'fileurl'     => $fileurl,
+    'timecreated' => time(),
+];
+
+$DB->insert_record('local_rainmake_backend_lecture_files', $record);
 
 echo json_encode(['success' => true, 'url' => $fileurl, 'filename' => $filename]);
 exit;

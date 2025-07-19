@@ -15,7 +15,7 @@ $fs = get_file_storage();
 $preparedFiles = [];
 
 foreach ($files as $f) {
-    $stored = $fs->get_file($context->id, 'local_rainmake_backend', 'attached_files', $lectureid, '/', $f->filename);
+    $stored = $fs->get_file($context->id, 'local_rainmake_backend', 'lecture_files', $lectureid, '/', $f->filename);
     if (!$stored) continue;
 
     $preparedFiles[] = [
