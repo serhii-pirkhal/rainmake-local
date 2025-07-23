@@ -40,9 +40,15 @@ class Gradebook
         return $count;
     }
 
-    public function getGrades($page, $perPage, $onlyLow = false): array
+    public function getGrades($page, $perPage, $onlyLow = false, $filters = null): array
     {
-        $courses = enrol_get_my_courses();
+        $courses = null;
+        if($filters && $filters['course']){
+            $courses = $this->DB->get_records('course', ['id' => $filters['course']]);
+        }
+        else{
+            $courses = enrol_get_my_courses();
+        }
         $grades = array();
         $gradesGrades = array();
         $perpage = $perPage * $page;
@@ -87,6 +93,18 @@ class Gradebook
                             'grade_grades',
                             'itemid = ? AND finalgrade <= ?',
                             [$item->id, 60],
+                            '',
+                            'id, userid, finalgrade, feedback'
+                        )
+                    ];
+                }
+                else if($filters && $filters['student']){
+                    $gradesGrades[] = [
+                        'item' => $item,
+                        'grades' => $this->DB->get_records(
+                            'grade_grades',
+                            ['itemid' => $item->id,
+                            'userid' => $filters['student']],
                             '',
                             'id, userid, finalgrade, feedback'
                         )

@@ -16,14 +16,14 @@ class Course {
     }
 
 
-    public function getMyCoursesCount(): int
+    public function getMyCoursesCount($filters = null): int
     {
-        return $this->DB->count_records('course');
+        return $this->DB->count_records('course', $filters);
     }
-    public function getMyCourses($page=1, $perpage=10, $filters = null, $sort = null): array
+    public function getMyCourses($page=null, $perpage=null, $filters = null, $sort = null): array
     {
         $offset = ($page - 1) * $perpage;
-        $courses = $this->DB->get_records('course', null, '', 'id, category, fullname, shortname', $offset, $perpage);
+        $courses = $this->DB->get_records('course', $filters, $sort, 'id, category, fullname, shortname', $offset, $perpage);
 
         foreach ($courses as &$course) {
             $course->category = $this->DB->get_record('course_categories', array('id' => $course->category), 'id, name, description, coursecount');
