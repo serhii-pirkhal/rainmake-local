@@ -4,6 +4,8 @@ require_once(__DIR__ . '/../../../config.php');
 require_login();
 require_sesskey();
 
+$PAGE->set_context(context_system::instance());
+
 $lectureid = required_param('lectureid', PARAM_INT);
 
 $lecture = $DB->get_record('local_rainmake_backend_lectures', ['id' => $lectureid], '*', MUST_EXIST);
