@@ -137,7 +137,7 @@ class Course {
                 }
                 $lecture->attached_count = count($lecture->files);
                 $lecture->index = $index;
-                $duration = (int)$lecture->video->duration ?? 0;
+                $duration = $lecture->video ? (int)$lecture->video->duration : 0;
                 $session->duration += $duration;
                 $course->duration += $duration;
                 $lecture->duration = $this->getDuration($duration);
