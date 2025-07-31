@@ -47,23 +47,24 @@ class Course {
             $params['category'] = $filters['category'];
         }
 
-        $order = "fullname ASC";
-        if (!empty($sort)) {
-            switch ($sort) {
-                case 'name_asc':
-                    $order = 'fullname ASC';
-                    break;
-                case 'name_desc':
-                    $order = 'fullname DESC';
-                    break;
-                case 'id_desc':
-                    $order = 'id DESC';
-                    break;
-                case 'id_asc':
-                    $order = 'id ASC';
-                    break;
-            }
+        if(empty($sort)) {
+            $sort = 'id_desc';
         }
+        switch ($sort) {
+            case 'name_asc':
+                $order = 'fullname ASC';
+                break;
+            case 'name_desc':
+                $order = 'fullname DESC';
+                break;
+            case 'id_desc':
+                $order = 'id DESC';
+                break;
+            case 'id_asc':
+                $order = 'id ASC';
+                break;
+        }
+
 
         $sql = "SELECT id, category, fullname, shortname 
             FROM {course} 
@@ -149,11 +150,12 @@ class Course {
 
             $session->total = count($lectures);
             $course->lectures_total += $session->total;
-            $course->sessions_count += count($sessions);
             $session->lectures_count = count($lectures);
             $session->lectures = array_values($lectures);
             $session->duration = $this->getDuration($session->duration);
         }
+
+        $course->sessions_count = count($sessions);
 
         $course->duration = $this->getDuration($course->duration);
 
