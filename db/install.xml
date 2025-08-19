@@ -118,6 +118,43 @@
                 <KEY NAME="fk_session" TYPE="foreign" FIELDS="sessionid" REFTABLE="local_rainmake_backend_sessions" REFFIELDS="id"/>
             </KEYS>
         </TABLE>
+
+        <TABLE NAME="local_rainmake_backend_user_social" COMMENT="Stores user social">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Primary key"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="User who viewed the lecture"/>
+                <FIELD NAME="website" TYPE="char" LENGTH="255" NOTNULL="false"/>
+                <FIELD NAME="facebook" TYPE="char" LENGTH="255" NOTNULL="false"/>
+                <FIELD NAME="slack" TYPE="char" LENGTH="255" NOTNULL="false"/>
+                <FIELD NAME="linkedin" TYPE="char" LENGTH="255" NOTNULL="false"/>
+                <FIELD NAME="instagram" TYPE="char" LENGTH="255" NOTNULL="false"/>
+                <FIELD NAME="twitter" TYPE="char" LENGTH="255" NOTNULL="false"/>
+                <FIELD NAME="youtube" TYPE="char" LENGTH="255" NOTNULL="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="fk_user" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+            </KEYS>
+        </TABLE>
+
+        <TABLE NAME="local_rainmake_backend_user_notification" COMMENT="Stores notifications settings">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Primary key"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="buy_course" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="write_review" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="comment_course" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="download_notes" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="reply_comment" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="people_visited" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="download_attach" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="fk_user" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+            </KEYS>
+        </TABLE>
+
         <TABLE NAME="assignment_tasks" COMMENT="Tasks linked to courses">
             <FIELDS>
                 <FIELD NAME="id"         TYPE="int"    LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
