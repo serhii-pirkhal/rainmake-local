@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <XMLDB PATH="local/rainmake_backend/db" VERSION="2025063001" COMMENT="Rainmake Backend tables">
     <TABLES>
+        <TABLE NAME="local_rainmake_backend_careerpaths" COMMENT="Careerpaths">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="description" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="type" TYPE="char" LENGTH="255" NOTNULL="false"/>
+                <FIELD NAME="difficulty" TYPE="char" LENGTH="255" NOTNULL="false"/>
+                <FIELD NAME="exp" TYPE="int" LENGTH="10" NOTNULL="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+        </TABLE>
 
         <TABLE NAME="local_rainmake_backend_coursemeta" COMMENT="Additional course data">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
                 <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" UNIQUE="true"/>
+                <FIELD NAME="careerpathid" TYPE="int" LENGTH="10" NOTNULL="false"/>
                 <FIELD NAME="topic" TYPE="text" NOTNULL="false"/>
                 <FIELD NAME="language" TYPE="char" LENGTH="10" NOTNULL="false"/>
                 <FIELD NAME="subtitlelanguage" TYPE="char" LENGTH="10" NOTNULL="false"/>
@@ -22,6 +36,7 @@
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
                 <KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+                <KEY NAME="careerpathfk" TYPE="foreign" FIELDS="careerpathid" REFTABLE="local_rainmake_backend_careerpaths" REFFIELDS="id"/>
             </KEYS>
         </TABLE>
 
