@@ -4,7 +4,6 @@ require_login();
 require_sesskey();
 
 $fullname    = required_param('title', PARAM_TEXT);
-$shortname   = required_param('subtitle', PARAM_TEXT);
 $categoryid  = required_param('coursecategory', PARAM_INT);
 $courseid    = optional_param('id', null, PARAM_INT);
 
@@ -12,7 +11,6 @@ require_once($CFG->dirroot . '/course/lib.php');
 
 $course = (object)[
     'fullname' => $fullname,
-    'shortname' => $shortname,
     'category' => $categoryid,
 ];
 
@@ -32,9 +30,7 @@ $record = (object)[
     'courseid'         => $courseid,
     'topic'            => optional_param('coursetopic', '', PARAM_TEXT),
     'language'         => optional_param('courselanguage', '', PARAM_TEXT),
-    'subtitlelanguage' => optional_param('subtitlelanguage', '', PARAM_TEXT),
     'level'            => optional_param('courselevel', '', PARAM_TEXT),
-    'duration'         => optional_param('durations', 0, PARAM_INT),
     'timecreated'      => time(),
 ];
 
@@ -48,4 +44,4 @@ if ($existingmeta) {
 
 $SESSION->new_course_id = $courseid;
 
-redirect(new moodle_url('/theme/rainmake/admin/createcourse/advanced.php', ['id' => $courseid]));
+redirect(new moodle_url('/theme/rainmake/admin/createcourse/practice', ['id' => $courseid]));
