@@ -44,4 +44,4 @@ if ($existingmeta) {
 
 $SESSION->new_course_id = $courseid;
 
-redirect(new moodle_url('/theme/rainmake/admin/createcourse/practice', ['id' => $courseid]));
+redirect(new moodle_url('/theme/rainmake/admin/createcourse/practice.php', ['id' => $courseid]));

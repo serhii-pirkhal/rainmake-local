@@ -22,6 +22,9 @@ try {
             $practiceR->id = $key;
             $DB->update_record('local_rainmake_backend_practices', $practiceR);
             foreach ($practice['questions'] as $qKey => $question) {
+                if ((bool)$question['delete']){
+                    $DB->delete_records('local_rainmake_backend_practice_questions', ['id' => $qKey]);
+                }
                 $questionR = new stdClass();
                 $questionR->timecreated = time();
                 $questionR->practice_id = $key;
