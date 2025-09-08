@@ -24,17 +24,43 @@ try {
             foreach ($practice['questions'] as $qKey => $question) {
                 if ((bool)$question['delete']){
                     $DB->delete_records('local_rainmake_backend_practice_questions', ['id' => $qKey]);
+                    continue;
                 }
                 $questionR = new stdClass();
-                $questionR->timecreated = time();
                 $questionR->practice_id = $key;
                 $questionR->question = clean_param($question['question'] ?? '',   PARAM_TEXT);
                 $questionR->options = json_encode(array_values($question['options'] ?? []));
                 if(is_number($qKey)){
+                    $questionR->timeupdated = time();
                     $questionR->id = $qKey;
                     $DB->update_record('local_rainmake_backend_practice_questions', $questionR);
+                    foreach ($question['options'] as $oKey => $option) {
+                        if ((bool)$option['delete']){
+                            $DB->delete_records('local_rainmake_backend_practice_question_options', ['id' => $oKey]);
+                            continue;
+                        }
+                        $optionR = new stdClass();
+                        $optionR->question_id = $qKey;
+                        $optionR->content = clean_param($option['content'] ?? '',   PARAM_TEXT);
+                        if(is_number($oKey)){
+                            $optionR->id = $oKey;
+                            $optionR->timeupdated = time();
+                            $DB->update_record('local_rainmake_backend_practice_question_options', $optionR);
+                        }else{
+                            $optionR->timecreated = time();
+                            $DB->insert_record('local_rainmake_backend_practice_question_options', $optionR);
+                        }
+                    }
                 }else{
-                    $DB->insert_record('local_rainmake_backend_practice_questions', $questionR);
+                    $questionR->timecreated = time();
+                    $qId = $DB->insert_record('local_rainmake_backend_practice_questions', $questionR);
+                    foreach ($question['options'] as $oKey => $option) {
+                        $optionR = new stdClass();
+                        $optionR->question_id = $qId;
+                        $optionR->content = clean_param($option['content'] ?? '',   PARAM_TEXT);
+                        $optionR->timecreated = time();
+                        $DB->insert_record('local_rainmake_backend_practice_question_options', $optionR);
+                    }
                 }
             }
         } else {
@@ -44,8 +70,14 @@ try {
                 $questionR->timecreated = time();
                 $questionR->practice_id = $id;
                 $questionR->question = clean_param($question['question'] ?? '',   PARAM_TEXT);
-                $questionR->options = json_encode($question['options'] ?? []);
-                $DB->insert_record('local_rainmake_backend_practice_questions', $questionR);
+                $qId = $DB->insert_record('local_rainmake_backend_practice_questions', $questionR);
+                foreach ($question['options'] as $oKey => $option) {
+                    $optionR = new stdClass();
+                    $optionR->question_id = $qId;
+                    $optionR->content = clean_param($option['content'] ?? '',   PARAM_TEXT);
+                    $optionR->timecreated = time();
+                    $DB->insert_record('local_rainmake_backend_practice_question_options', $optionR);
+                }
             }
         }
     }
