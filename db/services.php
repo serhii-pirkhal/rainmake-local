@@ -24,4 +24,20 @@ $functions = [
         'type'        => 'read',
         'ajax'        => true,
     ],
+    'local_rainmake_backend_get_course_new_user_trainers' => [
+        'classname'   => 'local_rainmake_backend\external\get_course_new_user_trainers',
+        'methodname'  => 'execute',
+        'classpath'   => 'local/rainmake_backend/classes/external',
+        'description' => 'Returns courses that are not in the current career path',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
+    'local_rainmake_backend_course_user_unenroll' => [
+        'classname'   => 'local_rainmake_backend\external\course_user_unenroll',
+        'methodname'  => 'execute',
+        'classpath'   => 'local/rainmake_backend/classes/external',
+        'description' => 'unenroll a user from course',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
 ];

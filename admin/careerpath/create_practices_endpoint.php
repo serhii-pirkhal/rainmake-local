@@ -12,4 +12,4 @@ foreach ($courses as $course) {
     CreatePracticeAction($courses['practices'], $course['id']);
 }
 
-redirect(new moodle_url('/theme/rainmake/admin/createcareerpath/publish.php', ['id' => $courseid]));
+redirect(new moodle_url('/theme/rainmake/admin/createcareerpath/prove.php', ['id' => $courseid]));
