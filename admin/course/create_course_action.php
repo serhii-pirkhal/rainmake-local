@@ -6,7 +6,7 @@ use local_rainmake_backend\dto\CreateCourseMeta;
 require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->dirroot . '/course/lib.php');
 
-function createCourseAction(CreateCourseData $courseData, CreateCourseMeta $metaData): void
+function createCourseAction(CreateCourseData $courseData, CreateCourseMeta $metaData): int
 {
     global $DB, $SESSION;
     $course = (object)[
@@ -23,6 +23,11 @@ function createCourseAction(CreateCourseData $courseData, CreateCourseMeta $meta
         $courseid = $course->id;
     } else {
         $newcourse = create_course($course);
+        $DB->insert_record('local_rainmake_backend_course_types', [
+            'course_id' => $newcourse->id,
+            'type' => "course",
+            'timecreated' => time()
+        ]);
         $courseid = $newcourse->id;
     }
 
@@ -42,5 +47,5 @@ function createCourseAction(CreateCourseData $courseData, CreateCourseMeta $meta
         $DB->insert_record('local_rainmake_backend_coursemeta', $record);
     }
 
-    $SESSION->new_course_id = $courseid;
+    return $courseid;
 }

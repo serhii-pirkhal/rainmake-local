@@ -27,6 +27,11 @@ if ($courseid) {
     $courseid = $course->id;
 } else {
     $newcourse = create_course($course);
+    $DB->insert_record('local_rainmake_backend_course_types', [
+        'course_id' => $newcourse->id,
+        'type' => "careerpath",
+        'timecreated' => time()
+    ]);
     $courseid = $newcourse->id;
 }
 

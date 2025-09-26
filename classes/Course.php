@@ -38,12 +38,12 @@ class Course {
         $params = ['format' => 'topics'];
 
         if (!empty($search)) {
-            $where .= " AND (fullname LIKE :search1 OR shortname LIKE :search2)";
+            $where .= " AND (c.fullname LIKE :search1 OR c.shortname LIKE :search2)";
             $params['search1'] = $params['search2'] = '%' . $search . '%';
         }
 
         if (!empty($filters['category'])) {
-            $where .= " AND category = :category";
+            $where .= " AND c.category = :category";
             $params['category'] = $filters['category'];
         }
 
@@ -52,25 +52,26 @@ class Course {
         }
         switch ($sort) {
             case 'name_asc':
-                $order = 'fullname ASC';
+                $order = 'c.fullname ASC';
                 break;
             case 'name_desc':
-                $order = 'fullname DESC';
+                $order = 'c.fullname DESC';
                 break;
             case 'id_desc':
-                $order = 'id DESC';
+                $order = 'c.id DESC';
                 break;
             case 'id_asc':
-                $order = 'id ASC';
+                $order = 'c.id ASC';
                 break;
         }
 
 
-        $sql = "SELECT id, category, fullname, shortname 
-            FROM {course} 
+        $sql = "SELECT c.id, c.category, c.fullname, c.shortname 
+            FROM {course} AS c
+            JOIN {local_rainmake_backend_course_types} AS t ON c.id = t.course_id
             WHERE $where 
+            AND t.type = 'course'
             ORDER BY $order";
-
 
         $courses = $DB->get_records_sql($sql, $params, $offset, $perpage);
 

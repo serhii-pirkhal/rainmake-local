@@ -7,6 +7,7 @@ require_once(__DIR__ . '/../../../../config.php');
 require_once(__DIR__ . '/create_course_action.php');
 require_login();
 require_sesskey();
+global $SESSION;
 
 $course = new CreateCourseData();
 $course->fullname    = required_param('title', PARAM_TEXT);
@@ -18,6 +19,7 @@ $meta->topic = optional_param('coursetopic', '', PARAM_TEXT);
 $meta->language = optional_param('courselanguage', '', PARAM_TEXT);
 $meta->level = optional_param('courselevel', '', PARAM_TEXT);
 
-createCourseAction($course, $meta);
+$courseid = createCourseAction($course, $meta);
 
-redirect(new moodle_url('/theme/rainmake/admin/createcourse/practice.php', ['id' => $course->id]));
+$SESSION->new_course_id = $courseid;
+redirect(new moodle_url('/theme/rainmake/admin/createcourse/practice.php', ['id' => $courseid]));

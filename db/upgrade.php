@@ -134,5 +134,27 @@ function xmldb_local_rainmake_backend_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025091001, 'local', 'rainmake_backend');
     }
 
+    if ($oldversion < 2025092400) {
+        $table = new xmldb_table('local_rainmake_backend_course_types');
+
+        if ($dbman->table_exists($table)) {
+            $dbman->drop_table($table);
+        }
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('course_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('type', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('coursefk', XMLDB_KEY_FOREIGN, ['course_id'], 'course', ['id']);
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2025092400, 'local', 'rainmake_backend');
+    }
+
     return true;
 }
