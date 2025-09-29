@@ -30,6 +30,18 @@ return [
         'order' => 20,
         'navigation' => ['main_nav'],
     ],
+    'student_my_career_paths' => [
+        'id' => 'student_my_career_paths',
+        'url' => '/theme/rainmake/mycareerpath.php',
+        'layout' => 'rainmake',
+        'title' => 'My Career Paths',
+        'description' => 'My Career Paths',
+        'icon' => null,
+        'category' => 'student',
+        'permissions' => ['moodle/comment:view'],
+        'parent' => null,
+        'order' => 21,
+    ],
     'student_about' => [
         'id' => 'student_about',
         'title' => 'About',
