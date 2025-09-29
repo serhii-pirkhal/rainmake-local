@@ -97,9 +97,7 @@ class Careerpath
 
         $where .= " AND ue.userid = :userid";
         $params['userid'] = $USER->id;
-        var_dump($params);
-
-        // Визначення сортування
+        
         if (empty($sort)) {
             $sort = 'id_desc';
         }
