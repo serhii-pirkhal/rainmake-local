@@ -42,6 +42,14 @@ return [
         'parent' => null,
         'order' => 21,
     ],
+    'single_practice' => [
+        'id' => 'single_practice',
+        'url' => '/theme/rainmake/practice.php',
+        'layout' => 'rainmake',
+        'title' => 'Practice',
+        'description' => 'Practice',
+        'order' => 22,
+    ],
     'student_about' => [
         'id' => 'student_about',
         'title' => 'About',
