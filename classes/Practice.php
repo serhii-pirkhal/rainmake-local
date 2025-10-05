@@ -33,4 +33,17 @@ class Practice
 
         return $practice;
     }
+
+    public function saveAnswer($userid, $questionid, $option = null, $courseid = null, $practiceid = null): bool {
+        global $USER, $DB;
+
+        $record = new \stdClass();
+        $record->userid = $userid ?? $USER->id;
+        $record->question_id = $questionid;
+        $record->option = $option;
+        $record->course_id = $courseid;
+        $record->practice_id = $practiceid;
+
+        return $DB->insert_record('local_rainmake_backend_practice_answers', $record);
+    }
 }

@@ -156,5 +156,27 @@ function xmldb_local_rainmake_backend_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025092400, 'local', 'rainmake_backend');
     }
 
+    if ($oldversion < 2025100500) {
+        $table = new xmldb_table('local_rainmake_backend_practice_answers');
+
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('question_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('option', XMLDB_TYPE_TEXT , null, null, null, null, null);
+        $table->add_field('course_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('practice_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+        $table->add_key('question_id', XMLDB_KEY_FOREIGN, ['question_id'], 'local_rainmake_backend_practice_questions', ['id']);
+        $table->add_key('course_id', XMLDB_KEY_FOREIGN, ['course_id'], 'local_rainmake_backend_practice', ['course_id']);
+        $table->add_key('practice_id', XMLDB_KEY_FOREIGN, ['practice_id'], 'local_rainmake_backend_practice_questions', ['practice_id']);
+
+        if (!$DB->get_manager()->table_exists($table)) {
+            $DB->get_manager()->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2025100500, 'local', 'rainmake_backend');
+    }
+
     return true;
 }
