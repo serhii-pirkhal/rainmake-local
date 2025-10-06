@@ -66,6 +66,51 @@ if ($meta) {
     ]);
 }
 
+$instance = $DB->get_record('enrol', array(
+    'courseid' => $course->id,
+    'enrol' => 'self'
+));
+
+$enrol = enrol_get_plugin('self');
+
+if ($instance) {
+    $fields = array(
+        'status' => ENROL_INSTANCE_ENABLED,
+        'roleid' => 5,
+        'password' => '',
+        'enrolperiod' => 0,
+        'expirynotify' => 0,
+        'notifyall' => 0,
+        'customint1' => 0,
+        'customint2' => 0,
+        'customint3' => 0,
+        'customint4' => 0,
+        'customint5' => 0,
+        'customint6' => 1
+    );
+
+    $enrol->update_instance($instance, (object)$fields);
+    echo "Self enrollment enabled and updated";
+} else {
+    if ($enrol) {
+        $instanceid = $enrol->add_instance($course, array(
+            'status' => ENROL_INSTANCE_ENABLED,
+            'roleid' => 5,
+            'enrolperiod' => 0,
+            'expirynotify' => 0,
+            'notifyall' => 0,
+            'password' => '',
+            'customint1' => 0,
+            'customint2' => 0,
+            'customint3' => 0,
+            'customint4' => 0,
+            'customint5' => 0,
+            'customint6' => 1
+        ));
+        echo "Self enrollment created";
+    }
+}
+
 $SESSION->new_course_id = $courseid;
 
 redirect(new moodle_url('/theme/rainmake/admin/createcareerpath/publish.php', ['id' => $courseid]));

@@ -19,7 +19,17 @@ class Careerpath
         $this->DB = $DB;
     }
 
-    public function getCareerpaths($page = 1, $perpage = 10, $filters = null, $sort = null, $search = null): array
+    public function getCareerpathsCount(): int
+    {
+        $sql = "
+        SELECT COUNT(DISTINCT c.id)
+        FROM {course} AS c
+        JOIN {local_rainmake_backend_course_types} AS t ON c.id = t.course_id
+        WHERE t.type = 'careerpath'
+        ";
+        return $this->DB->count_records_sql($sql);
+    }
+    public function getCareerpaths(int $page = 1, int $perpage = 10, $filters = null, $sort = null, $search = null): array
     {
         global $DB;
 
@@ -97,7 +107,7 @@ class Careerpath
 
         $where .= " AND ue.userid = :userid";
         $params['userid'] = $USER->id;
-        
+
         if (empty($sort)) {
             $sort = 'id_desc';
         }
