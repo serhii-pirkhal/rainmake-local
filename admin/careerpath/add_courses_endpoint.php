@@ -12,7 +12,7 @@ $careerPathId = required_param('careerpath_id', PARAM_INT);
 $courses = $_POST['courses'];
 
 foreach ($courses as $cKey => $courseD) {
-    if(clean_param($courseD['remove'], PARAM_BOOL)) {
+    if (isset($courseD['remove']) && clean_param($courseD['remove'], PARAM_BOOL)) {
         $DB->delete_records('local_rainmake_backend_careerpath_courses', array('course_id' => $cKey));
         continue;
     }elseif (clean_param($courseD['add'], PARAM_BOOL)) {

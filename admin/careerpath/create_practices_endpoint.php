@@ -7,9 +7,17 @@ require_sesskey();
 
 $courseid    = optional_param('id', null, PARAM_INT);
 $courses    = $_POST['courses'] ?? array();
+$globalPractices = $_POST['practices'] ?? array();
+foreach ($courses as $courseId => $course) {
+    var_dump($course);
 
-foreach ($courses as $course) {
-    CreatePracticeAction($courses['practices'], $course['id']);
+    if (empty($course['practices'])) {
+        debugging('The array practices was not found in the course: ' . $courseId);
+        continue;
+    }
+    $allPractices = array_replace_recursive($globalPractices, $course['practices']);
+
+    CreatePracticeAction($allPractices, $courseId);
 }
 
 redirect(new moodle_url('/theme/rainmake/admin/createcareerpath/prove.php', ['id' => $courseid]));

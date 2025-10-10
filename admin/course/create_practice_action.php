@@ -32,8 +32,8 @@ function createPracticeAction(?array $practices, string $courseid): void
                         $questionR->id = $qKey;
                         $DB->update_record('local_rainmake_backend_practice_questions', $questionR);
                         foreach ($question['options'] as $oKey => $option) {
-                            if ((bool)$option['delete']){
-                                $DB->delete_records('local_rainmake_backend_practice_question_options', ['id' => $oKey]);
+                            if (isset($question['delete']) && (bool)$question['delete']) {
+                                $DB->delete_records('local_rainmake_backend_practice_questions', ['id' => $qKey]);
                                 continue;
                             }
                             $optionR = new stdClass();
