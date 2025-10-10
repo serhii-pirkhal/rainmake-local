@@ -6,10 +6,12 @@ require_login();
 require_sesskey();
 
 $courseid    = optional_param('id', null, PARAM_INT);
-$prove    = $_POST['prove'] ?? array();
+$proves    = $_POST['prove'] ?? array();
+$globalPractices = $_POST['practices'] ?? array();
+debugging(json_encode($proves, JSON_PRETTY_PRINT));
 
-debugging(json_encode($prove, JSON_PRETTY_PRINT));
+$allPractices = array_replace_recursive($globalPractices, $proves);
 
-CreatePracticeAction($prove, $courseid);
+CreatePracticeAction($allPractices, $courseid);
 
 redirect(new moodle_url('/theme/rainmake/admin/createcareerpath/publish.php', ['id' => $courseid]));
