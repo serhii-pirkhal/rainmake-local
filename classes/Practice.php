@@ -33,6 +33,19 @@ class Practice
 
         return $practice;
     }
+    public function getPractices($courseid): array
+    {
+        $practices = $this->DB->get_records('local_rainmake_backend_practices', ['courseid' => $courseid]);
+
+        foreach ($practices as &$practice) {
+            $practice->questions = array_values($this->DB->get_records('local_rainmake_backend_practice_questions', ['practice_id' => $practice->id]));
+            foreach ($practice->questions as &$question) {
+                $question->options = array_values($this->DB->get_records('local_rainmake_backend_practice_question_options', ['question_id' => $question->id]));
+            }
+            unset($question);
+        }
+        return array_values($practices);
+    }
 
     public function saveAnswer($userid, $questionid, $option = null, $courseid = null, $practiceid = null): bool {
         global $USER, $DB;

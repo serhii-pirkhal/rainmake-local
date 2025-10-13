@@ -15,7 +15,7 @@ foreach ($courses as $courseId => $course) {
         continue;
     }
     $allPractices = array_replace_recursive($globalPractices, $course['practices']);
-    CreatePracticeAction($allPractices, $courseid+1);
+    CreatePracticeAction($allPractices, $courseid);
 }
 
 redirect(new moodle_url('/theme/rainmake/admin/createcareerpath/prove.php', ['id' => $courseid]));
