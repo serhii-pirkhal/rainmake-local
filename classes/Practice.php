@@ -19,7 +19,21 @@ class Practice
         $this->DB = $DB;
     }
 
-    public function getPractice($courseid): ?\stdClass
+    public function getPractice($courseid, $id): ?\stdClass
+    {
+        $practice = $this->DB->get_record('local_rainmake_backend_practices', ['id' => $id, 'courseid' => $courseid]);
+
+        if ($practice) {
+            $practice->questions = array_values($this->DB->get_records('local_rainmake_backend_practice_questions', ['practice_id' => $practice->id]));
+
+            foreach ($practice->questions as &$question) {
+                $question->options = array_values($this->DB->get_records('local_rainmake_backend_practice_question_options', ['question_id' => $question->id]));
+            }
+        }
+
+        return $practice;
+    }
+    public function getProve($courseid): ?\stdClass
     {
         $practice = $this->DB->get_record('local_rainmake_backend_practices', ['courseid' => $courseid]);
 
