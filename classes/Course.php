@@ -17,9 +17,30 @@ class Course {
     }
 
 
-    public function getMyCoursesCount(): int
+    public function getMyCoursesCount($filters = null, $search = null): int
     {
-        return $this->DB->count_records('course');
+        global $DB;
+
+        $where = "format = :format";
+        $params = ['format' => 'topics'];
+
+        if (!empty($search)) {
+            $where .= " AND (c.fullname LIKE :search1 OR c.shortname LIKE :search2)";
+            $params['search1'] = $params['search2'] = '%' . $search . '%';
+        }
+
+        if (!empty($filters['category'])) {
+            $where .= " AND c.category = :category";
+            $params['category'] = $filters['category'];
+        }
+
+        $sql = "SELECT COUNT(c.id)
+            FROM {course} AS c
+            JOIN {local_rainmake_backend_course_types} AS t ON c.id = t.course_id
+            WHERE $where 
+            AND t.type = 'course'";
+
+        return $DB->count_records_sql($sql, $params);
     }
     public function getMyCourse(int $courseid): ?object
     {

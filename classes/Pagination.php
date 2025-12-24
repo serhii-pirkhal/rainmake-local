@@ -5,10 +5,10 @@ namespace local_rainmake_backend;
 class Pagination{
     public function getPagination($url, $page, $perPage, $items): ?array
     {
-        if ($items < $perPage){
+        $totalPages = ceil($items / $perPage);
+        if ($totalPages <= 1){
             return null;
         }
-        $totalPages = ceil($items / $perPage);
         $pages = array();
         for ($i = 1; $i <= $totalPages; $i++) {
             $active = false;
