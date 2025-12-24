@@ -69,11 +69,6 @@ class hook_callbacks {
     ): void {
         global $PAGE, $CFG, $DB, $USER;
 
-        // Skip if user is not logged in or is guest
-        if (!isloggedin() || isguestuser()) {
-            return;
-        }
-
         // Skip for AJAX requests, CLI scripts, and web services
         if (AJAX_SCRIPT || CLI_SCRIPT || WS_SERVER) {
             return;
@@ -102,6 +97,17 @@ class hook_callbacks {
         }
         if (empty($currentpath) || $currentpath === '/') {
             $currentpath = '/index.php';
+        }
+
+        // Redirect non-logged-in users to login page for index.php
+        // This replaces the code that was in index.php to prevent loss after Moodle updates
+        if (($currentpath === '/index.php' || $currentpath === '/') && (!isloggedin() || isguestuser())) {
+            redirect(new \moodle_url('/login/index.php'));
+        }
+
+        // Skip if user is not logged in or is guest (for other pages)
+        if (!isloggedin() || isguestuser()) {
+            return;
         }
         
         // Skip for static files (images, CSS, JS, etc.)
