@@ -175,4 +175,4 @@ if ($instance) {
 
 $SESSION->new_course_id = $courseid;
 
-redirect(new moodle_url('/theme/rainmake/admin/createcareerpath/publish.php', ['id' => $courseid]));
+redirect(new moodle_url('/theme/rainmake/admin/createcareerpath/createcourse/basic.php', ['id' => $courseid]));
