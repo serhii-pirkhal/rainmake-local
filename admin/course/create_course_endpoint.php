@@ -5,6 +5,12 @@ use local_rainmake_backend\dto\CreateCourseMeta;
 
 require_once(__DIR__ . '/../../../../config.php');
 require_once(__DIR__ . '/create_course_action.php');
+
+$save_only = optional_param('save_only', 0, PARAM_INT);
+if ($save_only) {
+    ob_start();
+}
+
 require_login();
 require_sesskey();
 global $SESSION;
@@ -22,4 +28,16 @@ $meta->level = optional_param('courselevel', '', PARAM_TEXT);
 $courseid = createCourseAction($course, $meta);
 
 $SESSION->new_course_id = $courseid;
+
+if ($save_only) {
+    ob_end_clean();
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => true,
+        'courseid' => $courseid,
+        'message' => 'Course saved successfully'
+    ]);
+    exit;
+}
+
 redirect(new moodle_url('/theme/rainmake/admin/createcourse/practice.php', ['id' => $courseid]));

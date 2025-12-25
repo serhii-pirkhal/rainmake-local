@@ -1,5 +1,11 @@
 <?php
 require_once(__DIR__ . '/../../../../config.php');
+
+$save_only = optional_param('save_only', 0, PARAM_INT);
+if ($save_only) {
+    ob_start();
+}
+
 require_login();
 require_sesskey();
 
@@ -23,6 +29,17 @@ if ($meta) {
         'congrats' => $congrats,
         'timecreated' => time(),
     ]);
+}
+
+if ($save_only) {
+    ob_end_clean();
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => true,
+        'courseid' => $courseid,
+        'message' => 'Publish settings saved successfully'
+    ]);
+    exit;
 }
 
 redirect(new moodle_url('/theme/rainmake/course.php', ['id' => $courseid]), 'Published', 2);
