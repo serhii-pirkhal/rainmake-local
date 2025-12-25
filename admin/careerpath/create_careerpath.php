@@ -1,5 +1,11 @@
 <?php
 require_once(__DIR__ . '/../../../../config.php');
+
+$save_only = optional_param('save_only', 0, PARAM_INT);
+if ($save_only) {
+    ob_start();
+}
+
 require_login();
 require_sesskey();
 
@@ -152,7 +158,9 @@ if ($instance) {
     );
 
     $enrol->update_instance($instance, (object)$fields);
-    echo "Self enrollment enabled and updated";
+    if (!$save_only) {
+        echo "Self enrollment enabled and updated";
+    }
 } else {
     if ($enrol) {
         $instanceid = $enrol->add_instance($course, array(
@@ -169,10 +177,23 @@ if ($instance) {
             'customint5' => 0,
             'customint6' => 1
         ));
-        echo "Self enrollment created";
+        if (!$save_only) {
+            echo "Self enrollment created";
+        }
     }
 }
 
 $SESSION->new_course_id = $courseid;
+
+if ($save_only) {
+    ob_end_clean();
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => true,
+        'courseid' => $courseid,
+        'message' => 'Career path saved successfully'
+    ]);
+    exit;
+}
 
 redirect(new moodle_url('/theme/rainmake/admin/createcareerpath/createcourse/basic.php', ['id' => $courseid]));
