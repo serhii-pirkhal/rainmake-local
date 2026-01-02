@@ -68,6 +68,14 @@ return [
         'order' => 50,
         'navigation' => ['main_nav'],
     ],
+    'student_profile' => [
+        'id' => 'student_profile',
+        'url' => '/theme/rainmake/profile.php',
+        'layout' => 'rainmake',
+        'title' => 'Profile',
+        'description' => 'Profile',
+        'order' => 60,
+    ],
     'admin_dashboard' => [
         'id' => 'admin_dashboard',
         'url' => '/theme/rainmake/admin/dashboard.php',
