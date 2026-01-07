@@ -1,6 +1,7 @@
 <?php
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/user/lib.php');
+require_once($CFG->libdir . '/gdlib.php');
 require_login();
 
 $email = required_param('email', PARAM_TEXT);
