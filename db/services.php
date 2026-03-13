@@ -40,4 +40,20 @@ $functions = [
         'type'        => 'read',
         'ajax'        => true,
     ],
+    'local_rainmake_backend_search_users' => [
+        'classname'   => 'local_rainmake_backend\external\search_users',
+        'methodname'  => 'execute',
+        'classpath'   => 'local/rainmake_backend/classes/external',
+        'description' => 'Search users by name, username, or email',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
+    'local_rainmake_backend_search_courses' => [
+        'classname'   => 'local_rainmake_backend\external\search_courses',
+        'methodname'  => 'execute',
+        'classpath'   => 'local/rainmake_backend/classes/external',
+        'description' => 'Search courses by fullname or shortname',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
 ];
