@@ -56,6 +56,7 @@ class Assignment
                 $file->name = basename($this->CFG->dirroot . "/" . $file->filepath);
             }
             $task->users = $users;
+            $task->user_ids = implode(',', array_map(function($u) { return $u->id; }, $users));
             // Aggregate data for template.
             $task->studentscount = count($users);
             $task->filescount = count($task->files);
