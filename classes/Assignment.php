@@ -54,6 +54,14 @@ class Assignment
             foreach ($task->files as $file) {
                 $file->size = round(filesize($this->CFG->dirroot . "/" . $file->filepath) / (1024 * 1024), 1);
                 $file->name = basename($this->CFG->dirroot . "/" . $file->filepath);
+                // Display name: first part + "…" + last part (so start and extension are visible).
+                $len = mb_strlen($file->name);
+                $firstChars = 16;
+                $lastChars = 16;
+                $minLen = $firstChars + $lastChars + 1;
+                $file->name_display = ($len > $minLen)
+                    ? mb_substr($file->name, 0, $firstChars) . '…' . mb_substr($file->name, -$lastChars)
+                    : $file->name;
             }
             $task->users = $users;
             $task->user_ids = implode(',', array_map(function($u) { return $u->id; }, $users));
