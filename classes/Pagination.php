@@ -22,8 +22,8 @@ class Pagination{
             ];
         }
         return [
-            'prev' => $page == 1 ? null : $url->out(false, ['page' => $page - 1]),
-            'next' => $page == $totalPages ? null : $url->out(false, ['page' => $page + 1]),
+            'prev' => $page == 1 ? null : ['url' => $url->out(false, ['page' => $page - 1])],
+            'next' => $page == $totalPages ? null : ['url' => $url->out(false, ['page' => $page + 1])],
             'pages' => $pages,
         ];
     }
