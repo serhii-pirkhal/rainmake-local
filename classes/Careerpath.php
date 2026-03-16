@@ -19,15 +19,28 @@ class Careerpath
         $this->DB = $DB;
     }
 
-    public function getCareerpathsCount(): int
+    public function getCareerpathsCount($filters = null, $search = null): int
     {
+        $where = "t.type = 'careerpath'";
+        $params = [];
+
+        if (!empty($search)) {
+            $where .= " AND (c.fullname LIKE :search1 OR c.shortname LIKE :search2)";
+            $params['search1'] = $params['search2'] = '%' . $search . '%';
+        }
+
+        if (!empty($filters['category'])) {
+            $where .= " AND c.category = :category";
+            $params['category'] = $filters['category'];
+        }
+
         $sql = "
         SELECT COUNT(DISTINCT c.id)
         FROM {course} AS c
         JOIN {local_rainmake_backend_course_types} AS t ON c.id = t.course_id
-        WHERE t.type = 'careerpath'
+        WHERE $where
         ";
-        return $this->DB->count_records_sql($sql);
+        return $this->DB->count_records_sql($sql, $params);
     }
     public function getCareerpaths(int $page = 1, int $perpage = 10, $filters = null, $sort = null, $search = null): array
     {
@@ -38,8 +51,13 @@ class Careerpath
         $params = [];
 
         if (!empty($search)) {
-            $where .= " AND c.title LIKE :search1";
-            $params['search1'] = '%' . $search . '%';
+            $where .= " AND (c.fullname LIKE :search1 OR c.shortname LIKE :search2)";
+            $params['search1'] = $params['search2'] = '%' . $search . '%';
+        }
+
+        if (!empty($filters['category'])) {
+            $where .= " AND c.category = :category";
+            $params['category'] = $filters['category'];
         }
 
         if(empty($sort)) {
@@ -47,16 +65,19 @@ class Careerpath
         }
         switch ($sort) {
             case 'name_asc':
-                $order = 'c.title ASC';
+                $order = 'c.fullname ASC';
                 break;
             case 'name_desc':
-                $order = 'c.title DESC';
+                $order = 'c.fullname DESC';
                 break;
             case 'id_desc':
                 $order = 'c.id DESC';
                 break;
             case 'id_asc':
                 $order = 'c.id ASC';
+                break;
+            default:
+                $order = 'c.id DESC';
                 break;
         }
 
@@ -105,6 +126,11 @@ class Careerpath
             $params['search1'] = '%' . $search . '%';
         }
 
+        if (!empty($filters['category'])) {
+            $where .= " AND c.category = :category";
+            $params['category'] = $filters['category'];
+        }
+
         $where .= " AND ue.userid = :userid";
         $params['userid'] = $USER->id;
 
@@ -123,6 +149,9 @@ class Careerpath
                 break;
             case 'id_asc':
                 $order = 'c.id ASC';
+                break;
+            default:
+                $order = 'c.id DESC';
                 break;
         }
 
