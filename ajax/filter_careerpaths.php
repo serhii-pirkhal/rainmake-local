@@ -3,7 +3,8 @@ define('AJAX_SCRIPT', true);
 require_once(__DIR__ . '/../../../config.php');
 require_login();
 
-$course = new \local_rainmake_backend\Course();
+$coursemanager = new \local_rainmake_backend\Course();
+$careerpathmanager = new \local_rainmake_backend\Careerpath();
 
 $PAGE->set_context(context_system::instance());
 
@@ -20,7 +21,12 @@ if ($fCategory) {
     $filters['category'] = $fCategory;
 }
 
-$courses = $course->getMyCourses($page, $perPage, $filters, $sort, $search);
+$careerpaths = $careerpathmanager->getCareerpaths($page, $perPage, $filters, $sort, $search);
+$courses = [];
+foreach ($careerpaths as $careerpath) {
+    $course = $DB->get_record('course', ['id' => $careerpath->id], 'id, category, fullname, shortname', MUST_EXIST);
+    $courses[] = $coursemanager->courseResource($course);
+}
 $courses = array_values($courses);
 
 echo json_encode([
