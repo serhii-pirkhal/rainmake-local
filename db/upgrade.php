@@ -3,7 +3,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 function xmldb_local_rainmake_backend_upgrade($oldversion) {
-    global $DB;
+    global $DB, $CFG;
 
     $dbman = $DB->get_manager();
 
@@ -196,6 +196,58 @@ function xmldb_local_rainmake_backend_upgrade($oldversion) {
         }
 
         upgrade_plugin_savepoint(true, 2026031500, 'local', 'rainmake_backend');
+    }
+
+    // Create assignment_tasks_courses join table for multi-course task assignment.
+    if ($oldversion < 2026031700) {
+        $table = new xmldb_table('assignment_tasks_courses');
+
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('task_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('course_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('fk_task', XMLDB_KEY_FOREIGN, ['task_id'], 'assignment_tasks', ['id']);
+            $table->add_key('fk_course', XMLDB_KEY_FOREIGN, ['course_id'], 'course', ['id']);
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026031700, 'local', 'rainmake_backend');
+    }
+
+    // Refresh external functions/services from db/services.php (e.g. newly added AJAX endpoints).
+    if ($oldversion < 2026031701) {
+        require_once($CFG->dirroot . '/lib/externallib.php');
+        external_update_services('local_rainmake_backend');
+
+        upgrade_plugin_savepoint(true, 2026031701, 'local', 'rainmake_backend');
+    }
+
+    // Store the exact selected curriculum items (course/module/lecture) per assigned task.
+    if ($oldversion < 2026031702) {
+        $table = new xmldb_table('assignment_tasks_curriculum');
+
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('task_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('item_type', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'course');
+            $table->add_field('course_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('module_id', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
+            $table->add_field('lecture_id', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
+            $table->add_field('title', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('subtitle', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('fk_task', XMLDB_KEY_FOREIGN, ['task_id'], 'assignment_tasks', ['id']);
+            $table->add_key('fk_course', XMLDB_KEY_FOREIGN, ['course_id'], 'course', ['id']);
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026031702, 'local', 'rainmake_backend');
     }
 
     return true;

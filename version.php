@@ -2,7 +2,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_rainmake_backend';
-$plugin->version   = 2026031500;
+$plugin->version   = 2026031702;
 $plugin->requires  = 2022041900;
 $plugin->maturity  = MATURITY_ALPHA;
 $plugin->release   = '0.1';

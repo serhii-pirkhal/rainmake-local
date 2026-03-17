@@ -50,7 +50,9 @@ class Assignment
     public function getTasksCount(string $search = '', ?int $studentid = null): int
     {
         $params = [];
-        $joins = "LEFT JOIN {course} c ON c.id = t.course_id";
+        $joins = "LEFT JOIN {course} c ON c.id = t.course_id
+                  LEFT JOIN {assignment_tasks_courses} tc ON tc.task_id = t.id
+                  LEFT JOIN {course} c2 ON c2.id = tc.course_id";
         $where = "1=1";
 
         if ($studentid > 0) {
@@ -63,8 +65,10 @@ class Assignment
             $liketerm = '%' . $this->DB->sql_like_escape($search) . '%';
             $params['searchname'] = $liketerm;
             $params['searchfullname'] = $liketerm;
+            $params['searchfullname2'] = $liketerm;
             $where .= " AND (" . $this->DB->sql_like('t.name', ':searchname', false, false, false)
-                . " OR " . $this->DB->sql_like('c.fullname', ':searchfullname', false, false, false) . ")";
+                . " OR " . $this->DB->sql_like('c.fullname', ':searchfullname', false, false, false)
+                . " OR " . $this->DB->sql_like('c2.fullname', ':searchfullname2', false, false, false) . ")";
         }
 
         $sql = "SELECT COUNT(DISTINCT t.id) AS cnt
@@ -79,7 +83,9 @@ class Assignment
     {
         $offset = ($page - 1) * $perPage;
         $params = [];
-        $joins = "LEFT JOIN {course} c ON c.id = t.course_id";
+        $joins = "LEFT JOIN {course} c ON c.id = t.course_id
+                  LEFT JOIN {assignment_tasks_courses} tc ON tc.task_id = t.id
+                  LEFT JOIN {course} c2 ON c2.id = tc.course_id";
         $where = "1=1";
 
         if ($studentid > 0) {
@@ -92,8 +98,10 @@ class Assignment
             $liketerm = '%' . $this->DB->sql_like_escape($search) . '%';
             $params['searchname'] = $liketerm;
             $params['searchfullname'] = $liketerm;
+            $params['searchfullname2'] = $liketerm;
             $where .= " AND (" . $this->DB->sql_like('t.name', ':searchname', false, false, false)
-                . " OR " . $this->DB->sql_like('c.fullname', ':searchfullname', false, false, false) . ")";
+                . " OR " . $this->DB->sql_like('c.fullname', ':searchfullname', false, false, false)
+                . " OR " . $this->DB->sql_like('c2.fullname', ':searchfullname2', false, false, false) . ")";
         }
 
         $sql = "SELECT t.id
@@ -139,7 +147,45 @@ class Assignment
                     'initials' => self::user_initials($u),
                 ];
             }
-            $task->course = $this->DB->get_record('course', array('id' => $task->course_id), 'fullname, shortname');
+            $task->course = $this->DB->get_record('course', array('id' => $task->course_id), 'id, fullname, shortname');
+            // Multi-course support: fetch any linked courses and build a display string.
+            $courses = [];
+            if (!empty($task->course)) {
+                $courses[(int)$task->course->id] = $task->course;
+            }
+            $linked = $this->DB->get_records('assignment_tasks_courses', ['task_id' => $task->id], null, 'course_id');
+            if (!empty($linked)) {
+                $linkedcourseids = array_values(array_unique(array_map(function($r) { return (int)$r->course_id; }, $linked)));
+                if (!empty($linkedcourseids)) {
+                    $linkedcourses = $this->DB->get_records_list('course', 'id', $linkedcourseids, '', 'id, fullname, shortname');
+                    foreach ($linkedcourses as $lc) {
+                        $courses[(int)$lc->id] = $lc;
+                    }
+                }
+            }
+            $task->courses = array_values($courses);
+            $task->courses_display = implode(', ', array_map(function($c) { return $c->fullname; }, $task->courses));
+
+            // Curriculum items selected for this task (course/module/lecture).
+            $curr = array_values($this->DB->get_records('assignment_tasks_curriculum', ['task_id' => $task->id], 'id ASC'));
+            $curritems = [];
+            foreach ($curr as $ci) {
+                $type = (string)($ci->item_type ?? 'course');
+                $curritems[] = (object)[
+                    'type' => $type,
+                    'title' => $ci->title ?? '',
+                    'subtitle' => $ci->subtitle ?? '',
+                    'iscourse' => ($type === 'course'),
+                    'ismodule' => ($type === 'module'),
+                    'islecture' => ($type === 'lecture'),
+                ];
+            }
+            $task->curriculum_items = $curritems;
+            $task->curriculum_display = implode(', ', array_map(function($it) { return $it->title; }, $curritems));
+            $firsttype = !empty($curritems) ? ($curritems[0]->type ?? 'course') : 'course';
+            $task->curriculum_icon_ismodule = ($firsttype === 'module');
+            $task->curriculum_icon_islecture = ($firsttype === 'lecture');
+            $task->curriculum_icon_iscourse = (!$task->curriculum_icon_ismodule && !$task->curriculum_icon_islecture);
             $task->files = array_values($this->DB->get_records('assignment_tasks_files', array('task_id' => $task->id), null, 'filepath'));
             foreach ($task->files as $file) {
                 $file->size = round(filesize($this->CFG->dirroot . "/" . $file->filepath) / (1024 * 1024), 1);
