@@ -277,6 +277,18 @@
                      FIELDS="course_id" REFTABLE="course" REFFIELDS="id"/>
             </KEYS>
         </TABLE>
+        <TABLE NAME="assignment_tasks_courses" COMMENT="Courses linked to tasks (many-to-many)">
+            <FIELDS>
+                <FIELD NAME="id"      TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="task_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="fk_task" TYPE="foreign" FIELDS="task_id" REFTABLE="assignment_tasks" REFFIELDS="id"/>
+                <KEY NAME="fk_course" TYPE="foreign" FIELDS="course_id" REFTABLE="course" REFFIELDS="id"/>
+            </KEYS>
+        </TABLE>
         <TABLE NAME="assignment_tasks_files" COMMENT="File paths for each task">
             <FIELDS>
                 <FIELD NAME="id"      TYPE="int"    LENGTH="10" NOTNULL="true" SEQUENCE="true"/>

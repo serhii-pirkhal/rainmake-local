@@ -19,12 +19,48 @@ if (!$tasks || !is_array($tasks)) {
     );
 }
 
+$uploadedpaths = [];
+if (!empty($_FILES['materials']['tmp_name']) && is_array($_FILES['materials']['tmp_name'])) {
+    foreach ($_FILES['materials']['tmp_name'] as $index => $tmp_name) {
+        if ($tmp_name && $_FILES['materials']['error'][$index] === UPLOAD_ERR_OK) {
+            $original_name = $_FILES['materials']['name'][$index] ?? ('file_' . $index);
+            $safe_name = preg_replace('/[^a-zA-Z0-9._-]/', '_', $original_name);
+            // Avoid collisions.
+            $safe_name = time() . '_' . $index . '_' . $safe_name;
+            $destination = $upload_dir . '/' . $safe_name;
+            if (move_uploaded_file($tmp_name, $destination)) {
+                $uploadedpaths[] = 'local/rainmake_backend/uploads/' . $safe_name;
+            }
+        }
+    }
+}
+
 $transaction = $DB->start_delegated_transaction();
 foreach ($tasks as $task) {
     $name = clean_param($task['name'] ?? '', PARAM_TEXT);
     $feedback = clean_param($task['feedback'] ?? '', PARAM_TEXT);
     $courseid = clean_param($task['course'] ?? 0, PARAM_INT);
+    $coursesraw = clean_param($task['courses'] ?? '', PARAM_RAW);
     $useremails = clean_param($task['users'] ?? '', PARAM_RAW);
+
+    $courseids = [];
+    if ($coursesraw !== '') {
+        $tokens = preg_split('/[\s,]+/', trim($coursesraw), -1, PREG_SPLIT_NO_EMPTY);
+        foreach ($tokens as $t) {
+            $id = clean_param($t, PARAM_INT);
+            if ($id > 0) $courseids[$id] = $id;
+        }
+    }
+    if ($courseid > 0) {
+        $courseids[$courseid] = $courseid;
+    }
+    $courseids = array_values($courseids);
+    if (empty($courseids)) {
+        $courseid = 0;
+    } else {
+        // Keep a primary course in assignment_tasks for backwards compatibility / display.
+        $courseid = (int)$courseids[0];
+    }
 
     if (empty($name) || $courseid <= 0) {
         $transaction->rollback(new moodle_exception('invalidparameter', 'error'));
@@ -36,6 +72,24 @@ foreach ($tasks as $task) {
         'feedback' => $feedback,
     ];
     $taskid = $DB->insert_record('assignment_tasks', $taskr);
+
+    // Link task to all selected courses.
+    if (count($courseids) > 1) {
+        $linkrecords = [];
+        foreach ($courseids as $cid) {
+            $linkrecords[] = (object)[
+                'task_id' => $taskid,
+                'course_id' => (int)$cid,
+            ];
+        }
+        $DB->insert_records('assignment_tasks_courses', $linkrecords);
+    } else {
+        // Still insert link for primary course so queries can rely on the join table.
+        $DB->insert_record('assignment_tasks_courses', (object)[
+            'task_id' => $taskid,
+            'course_id' => $courseid,
+        ]);
+    }
 
     // Parse tokens separated by spaces/commas; each can be an email or a username.
     $emails = preg_split('/[\s,]+/', trim($useremails), -1, PREG_SPLIT_NO_EMPTY);
@@ -73,22 +127,12 @@ foreach ($tasks as $task) {
         $DB->insert_records('assignment_tasks_students', $studentsr);
     }
 
-    if (!empty($_FILES['materials']['tmp_name']) && is_array($_FILES['materials']['tmp_name'])) {
-        foreach ($_FILES['materials']['tmp_name'] as $index => $tmp_name) {
-            if ($tmp_name && $_FILES['materials']['error'][$index] === UPLOAD_ERR_OK) {
-                $original_name = $_FILES['materials']['name'][$index];
-                $safe_name = preg_replace('/[^a-zA-Z0-9._-]/', '_', $original_name);
-                $destination = $upload_dir . '/' . $safe_name;
-
-                if (move_uploaded_file($tmp_name, $destination)) {
-                    $file_record = (object)[
-                        'task_id' => $taskid,
-                        'filepath' => 'local/rainmake_backend/uploads/' . $safe_name,
-                    ];
-                    $DB->insert_record('assignment_tasks_files', $file_record);
-                }
-            }
-        }
+    foreach ($uploadedpaths as $path) {
+        $file_record = (object)[
+            'task_id' => $taskid,
+            'filepath' => $path,
+        ];
+        $DB->insert_record('assignment_tasks_files', $file_record);
     }
 }
 $transaction->allow_commit();

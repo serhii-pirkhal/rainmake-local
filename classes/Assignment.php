@@ -50,7 +50,9 @@ class Assignment
     public function getTasksCount(string $search = '', ?int $studentid = null): int
     {
         $params = [];
-        $joins = "LEFT JOIN {course} c ON c.id = t.course_id";
+        $joins = "LEFT JOIN {course} c ON c.id = t.course_id
+                  LEFT JOIN {assignment_tasks_courses} tc ON tc.task_id = t.id
+                  LEFT JOIN {course} c2 ON c2.id = tc.course_id";
         $where = "1=1";
 
         if ($studentid > 0) {
@@ -63,8 +65,10 @@ class Assignment
             $liketerm = '%' . $this->DB->sql_like_escape($search) . '%';
             $params['searchname'] = $liketerm;
             $params['searchfullname'] = $liketerm;
+            $params['searchfullname2'] = $liketerm;
             $where .= " AND (" . $this->DB->sql_like('t.name', ':searchname', false, false, false)
-                . " OR " . $this->DB->sql_like('c.fullname', ':searchfullname', false, false, false) . ")";
+                . " OR " . $this->DB->sql_like('c.fullname', ':searchfullname', false, false, false)
+                . " OR " . $this->DB->sql_like('c2.fullname', ':searchfullname2', false, false, false) . ")";
         }
 
         $sql = "SELECT COUNT(DISTINCT t.id) AS cnt
@@ -79,7 +83,9 @@ class Assignment
     {
         $offset = ($page - 1) * $perPage;
         $params = [];
-        $joins = "LEFT JOIN {course} c ON c.id = t.course_id";
+        $joins = "LEFT JOIN {course} c ON c.id = t.course_id
+                  LEFT JOIN {assignment_tasks_courses} tc ON tc.task_id = t.id
+                  LEFT JOIN {course} c2 ON c2.id = tc.course_id";
         $where = "1=1";
 
         if ($studentid > 0) {
@@ -92,8 +98,10 @@ class Assignment
             $liketerm = '%' . $this->DB->sql_like_escape($search) . '%';
             $params['searchname'] = $liketerm;
             $params['searchfullname'] = $liketerm;
+            $params['searchfullname2'] = $liketerm;
             $where .= " AND (" . $this->DB->sql_like('t.name', ':searchname', false, false, false)
-                . " OR " . $this->DB->sql_like('c.fullname', ':searchfullname', false, false, false) . ")";
+                . " OR " . $this->DB->sql_like('c.fullname', ':searchfullname', false, false, false)
+                . " OR " . $this->DB->sql_like('c2.fullname', ':searchfullname2', false, false, false) . ")";
         }
 
         $sql = "SELECT t.id

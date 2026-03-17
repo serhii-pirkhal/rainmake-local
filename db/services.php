@@ -56,4 +56,12 @@ $functions = [
         'type'        => 'read',
         'ajax'        => true,
     ],
+    'local_rainmake_backend_search_curriculum' => [
+        'classname'   => 'local_rainmake_backend\external\search_curriculum',
+        'methodname'  => 'execute',
+        'classpath'   => 'local/rainmake_backend/classes/external',
+        'description' => 'Search curriculum items (courses, modules, lectures)',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
 ];
