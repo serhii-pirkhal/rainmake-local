@@ -82,10 +82,10 @@ class search_curriculum extends external_api {
         $remaining = $limit - count($results);
         if ($remaining > 0 && $dbman->table_exists('local_rainmake_backend_sessions')) {
             try {
-                $sql = "SELECT s.id AS moduleid, s.courseid AS courseid, s.name AS title, c.fullname AS coursename, c.shortname AS courseshort
+                $sql = "SELECT s.id AS moduleid, s.courseid AS courseid, s.title AS title, c.fullname AS coursename, c.shortname AS courseshort
                           FROM {local_rainmake_backend_sessions} s
                           JOIN {course} c ON c.id = s.courseid
-                         WHERE " . $DB->sql_like('s.name', ':slike0', false, false, false) . "
+                         WHERE " . $DB->sql_like('s.title', ':slike0', false, false, false) . "
                       ORDER BY s.id DESC";
                 $sessions = $DB->get_records_sql($sql, ['slike0' => $like], 0, $remaining);
                 foreach ($sessions as $s) {
@@ -108,11 +108,11 @@ class search_curriculum extends external_api {
         $remaining = $limit - count($results);
         if ($remaining > 0 && $dbman->table_exists('local_rainmake_backend_lectures')) {
             try {
-                $sql = "SELECT l.id AS lectureid, l.sessionid AS moduleid, s.courseid AS courseid, l.name AS title, c.fullname AS coursename
+                $sql = "SELECT l.id AS lectureid, l.sessionid AS moduleid, s.courseid AS courseid, l.title AS title, c.fullname AS coursename
                           FROM {local_rainmake_backend_lectures} l
                           JOIN {local_rainmake_backend_sessions} s ON s.id = l.sessionid
                           JOIN {course} c ON c.id = s.courseid
-                         WHERE " . $DB->sql_like('l.name', ':llike0', false, false, false) . "
+                         WHERE " . $DB->sql_like('l.title', ':llike0', false, false, false) . "
                       ORDER BY l.id DESC";
                 $lectures = $DB->get_records_sql($sql, ['llike0' => $like], 0, $remaining);
                 foreach ($lectures as $l) {

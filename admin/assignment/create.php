@@ -41,6 +41,7 @@ foreach ($tasks as $task) {
     $feedback = clean_param($task['feedback'] ?? '', PARAM_TEXT);
     $courseid = clean_param($task['course'] ?? 0, PARAM_INT);
     $coursesraw = clean_param($task['courses'] ?? '', PARAM_RAW);
+    $curriculumraw = clean_param($task['curriculum'] ?? '', PARAM_RAW);
     $useremails = clean_param($task['users'] ?? '', PARAM_RAW);
 
     $courseids = [];
@@ -89,6 +90,83 @@ foreach ($tasks as $task) {
             'task_id' => $taskid,
             'course_id' => $courseid,
         ]);
+    }
+
+    // Persist exact curriculum selections (course/module/lecture) for display.
+    $curritems = [];
+    if ($curriculumraw !== '') {
+        $tokens = preg_split('/[\s,]+/', trim($curriculumraw), -1, PREG_SPLIT_NO_EMPTY);
+        foreach ($tokens as $tok) {
+            $tok = trim($tok);
+            if ($tok === '') continue;
+            // Expected format: "course:ID" | "module:ID" | "lecture:ID".
+            if (strpos($tok, ':') === false) continue;
+            [$type, $idstr] = explode(':', $tok, 2);
+            $type = clean_param($type, PARAM_ALPHA);
+            $itemid = clean_param($idstr, PARAM_INT);
+            if ($itemid <= 0) continue;
+            if (!in_array($type, ['course', 'module', 'lecture'], true)) continue;
+
+            $course_id = $courseid;
+            $module_id = 0;
+            $lecture_id = 0;
+            $title = '';
+            $subtitle = '';
+
+            if ($type === 'course') {
+                $c = $DB->get_record('course', ['id' => $itemid], 'id, fullname, shortname');
+                if (!$c) continue;
+                $course_id = (int)$c->id;
+                $title = $c->fullname;
+                $subtitle = $c->shortname ?? '';
+            } else if ($type === 'module') {
+                $s = $DB->get_record('local_rainmake_backend_sessions', ['id' => $itemid], 'id, courseid, title');
+                if (!$s) continue;
+                $course_id = (int)$s->courseid;
+                $module_id = (int)$s->id;
+                $title = $s->title;
+                $subtitle = '';
+            } else if ($type === 'lecture') {
+                $l = $DB->get_record('local_rainmake_backend_lectures', ['id' => $itemid], 'id, sessionid, title');
+                if (!$l) continue;
+                $lecture_id = (int)$l->id;
+                $title = $l->title;
+                $subtitle = '';
+                $s = $DB->get_record('local_rainmake_backend_sessions', ['id' => $l->sessionid], 'id, courseid');
+                if (!$s) continue;
+                $course_id = (int)$s->courseid;
+                $module_id = (int)$s->id;
+            }
+
+            $curritems[] = (object)[
+                'task_id' => $taskid,
+                'item_type' => $type,
+                'course_id' => $course_id,
+                'module_id' => $module_id,
+                'lecture_id' => $lecture_id,
+                'title' => $title,
+                'subtitle' => $subtitle,
+                'timecreated' => time(),
+            ];
+        }
+    }
+    if (!empty($curritems)) {
+        $DB->insert_records('assignment_tasks_curriculum', $curritems);
+    } else {
+        // Fallback: at least store the primary course.
+        $c = $DB->get_record('course', ['id' => $courseid], 'id, fullname, shortname');
+        if ($c) {
+            $DB->insert_record('assignment_tasks_curriculum', (object)[
+                'task_id' => $taskid,
+                'item_type' => 'course',
+                'course_id' => (int)$c->id,
+                'module_id' => 0,
+                'lecture_id' => 0,
+                'title' => $c->fullname,
+                'subtitle' => $c->shortname ?? '',
+                'timecreated' => time(),
+            ]);
+        }
     }
 
     // Parse tokens separated by spaces/commas; each can be an email or a username.

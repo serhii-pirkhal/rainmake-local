@@ -147,7 +147,45 @@ class Assignment
                     'initials' => self::user_initials($u),
                 ];
             }
-            $task->course = $this->DB->get_record('course', array('id' => $task->course_id), 'fullname, shortname');
+            $task->course = $this->DB->get_record('course', array('id' => $task->course_id), 'id, fullname, shortname');
+            // Multi-course support: fetch any linked courses and build a display string.
+            $courses = [];
+            if (!empty($task->course)) {
+                $courses[(int)$task->course->id] = $task->course;
+            }
+            $linked = $this->DB->get_records('assignment_tasks_courses', ['task_id' => $task->id], null, 'course_id');
+            if (!empty($linked)) {
+                $linkedcourseids = array_values(array_unique(array_map(function($r) { return (int)$r->course_id; }, $linked)));
+                if (!empty($linkedcourseids)) {
+                    $linkedcourses = $this->DB->get_records_list('course', 'id', $linkedcourseids, '', 'id, fullname, shortname');
+                    foreach ($linkedcourses as $lc) {
+                        $courses[(int)$lc->id] = $lc;
+                    }
+                }
+            }
+            $task->courses = array_values($courses);
+            $task->courses_display = implode(', ', array_map(function($c) { return $c->fullname; }, $task->courses));
+
+            // Curriculum items selected for this task (course/module/lecture).
+            $curr = array_values($this->DB->get_records('assignment_tasks_curriculum', ['task_id' => $task->id], 'id ASC'));
+            $curritems = [];
+            foreach ($curr as $ci) {
+                $type = (string)($ci->item_type ?? 'course');
+                $curritems[] = (object)[
+                    'type' => $type,
+                    'title' => $ci->title ?? '',
+                    'subtitle' => $ci->subtitle ?? '',
+                    'iscourse' => ($type === 'course'),
+                    'ismodule' => ($type === 'module'),
+                    'islecture' => ($type === 'lecture'),
+                ];
+            }
+            $task->curriculum_items = $curritems;
+            $task->curriculum_display = implode(', ', array_map(function($it) { return $it->title; }, $curritems));
+            $firsttype = !empty($curritems) ? ($curritems[0]->type ?? 'course') : 'course';
+            $task->curriculum_icon_ismodule = ($firsttype === 'module');
+            $task->curriculum_icon_islecture = ($firsttype === 'lecture');
+            $task->curriculum_icon_iscourse = (!$task->curriculum_icon_ismodule && !$task->curriculum_icon_islecture);
             $task->files = array_values($this->DB->get_records('assignment_tasks_files', array('task_id' => $task->id), null, 'filepath'));
             foreach ($task->files as $file) {
                 $file->size = round(filesize($this->CFG->dirroot . "/" . $file->filepath) / (1024 * 1024), 1);
