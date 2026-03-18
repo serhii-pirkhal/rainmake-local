@@ -1,6 +1,39 @@
 <?php
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Capture optional signup fields that should be persisted after the user record exists.
+ *
+ * @param stdClass $data Submitted signup data.
+ * @return void
+ */
+function local_rainmake_backend_post_signup_requests($data): void
+{
+    global $SESSION;
+
+    $linkedin = '';
+    if (!empty($data->linkedin)) {
+        $linkedin = trim((string)$data->linkedin);
+    } else if (!empty($data->linkedinprofile)) {
+        $linkedin = trim((string)$data->linkedinprofile);
+    }
+
+    if ($linkedin === '') {
+        unset($SESSION->local_rainmake_backend_signup_social);
+        unset($GLOBALS['local_rainmake_backend_signup_social']);
+        debugging('Rainmake signup: linkedin empty at post_signup_requests', DEBUG_DEVELOPER);
+        return;
+    }
+
+    $SESSION->local_rainmake_backend_signup_social = [
+        'linkedin' => $linkedin,
+    ];
+    $GLOBALS['local_rainmake_backend_signup_social'] = [
+        'linkedin' => $linkedin,
+    ];
+    debugging('Rainmake signup: captured linkedin at post_signup_requests = ' . $linkedin, DEBUG_DEVELOPER);
+}
+
 function local_rainmake_backend_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []): ?bool
 {
     global $USER;
