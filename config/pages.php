@@ -131,6 +131,9 @@ return [
     ],
     'admin_students' => [
         'id' => 'admin_students',
+        'url' => '/theme/rainmake/admin/students.php',
+        'layout' => 'rainmakeadmin',
+        'description' => 'Students',
         'title' => 'Students',
         'icon' => '/theme/rainmake/pix/icons/admin/GraduationCap.svg',
         'category' => 'admin',
