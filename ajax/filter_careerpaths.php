@@ -28,9 +28,13 @@ foreach ($careerpaths as $careerpath) {
     $courses[] = $coursemanager->courseResource($course);
 }
 $courses = array_values($courses);
+$total = $careerpathmanager->getCareerpathsCount($filters, $search);
+$hasmore = ($page * $perPage) < $total;
 
 echo json_encode([
     'success' => true,
     'html' => $OUTPUT->render_from_template('theme_rainmake/admin/courses_list', ['courses' => $courses]),
     'pagination' => '',
+    'hasMore' => $hasmore,
+    'nextPage' => $page + 1,
 ]);

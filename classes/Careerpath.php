@@ -42,7 +42,7 @@ class Careerpath
         ";
         return $this->DB->count_records_sql($sql, $params);
     }
-    public function getCareerpaths(int $page = 1, int $perpage = 10, $filters = null, $sort = null, $search = null): array
+    public function getCareerpaths(int $page = 1, int $perpage = 12, $filters = null, $sort = null, $search = null): array
     {
         global $DB;
 
