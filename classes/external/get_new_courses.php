@@ -24,7 +24,11 @@ class get_new_courses extends external_api
         $oldIds = array_filter($oldIds, function($course){
             return $course->course_id;
         });
-        $courses = $DB->get_records('course', null, null, 'id, fullname');
+        $sql = "SELECT c.id, c.fullname
+                  FROM {course} c
+                  JOIN {local_rainmake_backend_course_types} t ON t.course_id = c.id
+                 WHERE " . $DB->sql_compare_text('t.type') . " = :type";
+        $courses = $DB->get_records_sql($sql, ['type' => 'course']);
         $courses = array_filter($courses, function($course) use ($oldIds){
             foreach ($oldIds as $key => $oldId) {
                 if ($oldId == $course->id) {
@@ -71,4 +75,3 @@ class get_new_courses extends external_api
         ]);
     }
 }
-
