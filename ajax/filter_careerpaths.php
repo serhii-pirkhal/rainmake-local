@@ -33,7 +33,10 @@ $hasmore = ($page * $perPage) < $total;
 
 echo json_encode([
     'success' => true,
-    'html' => $OUTPUT->render_from_template('theme_rainmake/admin/courses_list', ['courses' => $courses]),
+    'html' => $OUTPUT->render_from_template('theme_rainmake/admin/courses_list', [
+        'courses' => $courses,
+        'sesskey' => sesskey(),
+    ]),
     'pagination' => '',
     'hasMore' => $hasmore,
     'nextPage' => $page + 1,
