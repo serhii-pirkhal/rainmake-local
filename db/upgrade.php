@@ -162,7 +162,7 @@ function xmldb_local_rainmake_backend_upgrade($oldversion) {
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('question_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('option', XMLDB_TYPE_TEXT , null, null, null, null, null);
+        $table->add_field('answer_option', XMLDB_TYPE_TEXT , null, null, null, null, null);
         $table->add_field('course_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('practice_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
 
@@ -248,6 +248,22 @@ function xmldb_local_rainmake_backend_upgrade($oldversion) {
         }
 
         upgrade_plugin_savepoint(true, 2026031702, 'local', 'rainmake_backend');
+    }
+
+    if ($oldversion < 2026032300) {
+        $table = new xmldb_table('local_rainmake_backend_practice_answers');
+        $oldfield = new xmldb_field('option', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $newfield = new xmldb_field('answer_option', XMLDB_TYPE_TEXT, null, null, null, null, null, 'question_id');
+
+        if ($dbman->table_exists($table)) {
+            if ($dbman->field_exists($table, $oldfield) && !$dbman->field_exists($table, $newfield)) {
+                $dbman->rename_field($table, $oldfield, 'answer_option');
+            } else if (!$dbman->field_exists($table, $newfield)) {
+                $dbman->add_field($table, $newfield);
+            }
+        }
+
+        upgrade_plugin_savepoint(true, 2026032300, 'local', 'rainmake_backend');
     }
 
     return true;
