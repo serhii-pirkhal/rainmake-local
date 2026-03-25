@@ -43,7 +43,17 @@ class get_new_courses extends external_api
             $fs = get_file_storage();
             $files = $fs->get_area_files($context->id, 'local_rainmake_backend', 'courseimage', $course->id, 'timemodified DESC', false);
 
-            if ($file = reset($files)) {
+            // Moodle sometimes stores a "directory placeholder" file with filename='.' in area files.
+            // Skip it so we don't generate a broken thumbnail URL.
+            $file = null;
+            foreach ($files as $candidate) {
+                if (!$candidate) continue;
+                if ($candidate->get_filename() === '.') continue;
+                $file = $candidate;
+                break;
+            }
+
+            if ($file) {
                 $course->img = \moodle_url::make_pluginfile_url(
                     $file->get_contextid(),
                     $file->get_component(),
