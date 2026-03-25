@@ -67,7 +67,7 @@ class Practice
         $record = new \stdClass();
         $record->userid = $userid ?? $USER->id;
         $record->question_id = $questionid;
-        $record->option = $option;
+        $record->answer_option = $option;
         $record->course_id = $courseid;
         $record->practice_id = $practiceid;
 

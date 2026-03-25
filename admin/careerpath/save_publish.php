@@ -46,4 +46,4 @@ if ($save_only) {
     exit;
 }
 
-redirect(new moodle_url('/theme/rainmake/course.php', ['id' => $courseid]), 'Published', 2);
+redirect(new moodle_url('/theme/rainmake/careerpath.php', ['id' => $courseid]), 'Published', 2);
