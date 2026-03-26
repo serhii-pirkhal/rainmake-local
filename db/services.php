@@ -32,6 +32,14 @@ $functions = [
         'type'        => 'read',
         'ajax'        => true,
     ],
+    'local_rainmake_backend_get_careerpath_enrolment_users' => [
+        'classname'   => 'local_rainmake_backend\external\get_careerpath_enrolment_users',
+        'methodname'  => 'execute',
+        'classpath'   => 'local/rainmake_backend/classes/external',
+        'description' => 'Returns enrolled and available users for a career path',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
     'local_rainmake_backend_course_user_unenroll' => [
         'classname'   => 'local_rainmake_backend\external\course_user_unenroll',
         'methodname'  => 'execute',
