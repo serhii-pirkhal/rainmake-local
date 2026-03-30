@@ -123,4 +123,4 @@ foreach ($includedcourses as $includedcourse) {
     rainmake_unenrol_users($includedcourseid, $removeuserids, ['manual']);
 }
 
-redirect(new moodle_url('/theme/rainmake/admincourses.php'));
+redirect(new moodle_url('/theme/rainmake/admincareerpaths.php'));

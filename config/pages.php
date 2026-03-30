@@ -118,7 +118,7 @@ return [
     ],
     'admin_career_paths' => [
         'id' => 'admin_career_paths',
-        'url' => '/theme/rainmake/admincourses.php',
+        'url' => '/theme/rainmake/admincareerpaths.php',
         'layout' => 'rainmakeadmin',
         'title' => 'Career Paths',
         'description' => 'All Career Paths',
@@ -129,6 +129,20 @@ return [
         'order' => 80,
         'navigation' => ['admin_nav'],
     ],
+    'admin_courses' => [
+        'id' => 'admin_courses',
+        'url' => '/theme/rainmake/admincourses.php',
+        'layout' => 'rainmakeadmin',
+        'title' => 'Courses',
+        'description' => 'All Courses',
+        'icon' => '/theme/rainmake/pix/icons/admin/Stack.svg',
+        'category' => 'admin',
+        'permissions' => ['moodle/course:create'],
+        'parent' => null,
+        'order' => 75,
+        'navigation' => ['admin_nav'],
+    ],
+  
     'admin_students' => [
         'id' => 'admin_students',
         'url' => '/theme/rainmake/admin/students.php',
