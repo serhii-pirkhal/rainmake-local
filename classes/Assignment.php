@@ -8,6 +8,7 @@ class Assignment
 {
     private \moodle_database $DB;
     private \stdClass $CFG;
+    private bool $hasassignmenttaskscourses;
 
     public function __construct()
     {
@@ -15,6 +16,7 @@ class Assignment
         global $CFG;
         $this->DB = $DB;
         $this->CFG = $CFG;
+        $this->hasassignmenttaskscourses = $DB->get_manager()->table_exists(new \xmldb_table('assignment_tasks_courses'));
     }
 
     /**
@@ -50,10 +52,13 @@ class Assignment
     public function getTasksCount(string $search = '', ?int $studentid = null): int
     {
         $params = [];
-        $joins = "LEFT JOIN {course} c ON c.id = t.course_id
-                  LEFT JOIN {assignment_tasks_courses} tc ON tc.task_id = t.id
-                  LEFT JOIN {course} c2 ON c2.id = tc.course_id";
+        $joins = "LEFT JOIN {course} c ON c.id = t.course_id";
         $where = "1=1";
+
+        if ($this->hasassignmenttaskscourses) {
+            $joins .= " LEFT JOIN {assignment_tasks_courses} tc ON tc.task_id = t.id
+                        LEFT JOIN {course} c2 ON c2.id = tc.course_id";
+        }
 
         if ($studentid > 0) {
             $joins .= " INNER JOIN {assignment_tasks_students} ts ON ts.task_id = t.id AND ts.user_id = :studentid";
@@ -65,10 +70,15 @@ class Assignment
             $liketerm = '%' . $this->DB->sql_like_escape($search) . '%';
             $params['searchname'] = $liketerm;
             $params['searchfullname'] = $liketerm;
-            $params['searchfullname2'] = $liketerm;
-            $where .= " AND (" . $this->DB->sql_like('t.name', ':searchname', false, false, false)
-                . " OR " . $this->DB->sql_like('c.fullname', ':searchfullname', false, false, false)
-                . " OR " . $this->DB->sql_like('c2.fullname', ':searchfullname2', false, false, false) . ")";
+            $searchconditions = [
+                $this->DB->sql_like('t.name', ':searchname', false, false, false),
+                $this->DB->sql_like('c.fullname', ':searchfullname', false, false, false),
+            ];
+            if ($this->hasassignmenttaskscourses) {
+                $params['searchfullname2'] = $liketerm;
+                $searchconditions[] = $this->DB->sql_like('c2.fullname', ':searchfullname2', false, false, false);
+            }
+            $where .= " AND (" . implode(' OR ', $searchconditions) . ")";
         }
 
         $sql = "SELECT COUNT(DISTINCT t.id) AS cnt
@@ -83,10 +93,13 @@ class Assignment
     {
         $offset = ($page - 1) * $perPage;
         $params = [];
-        $joins = "LEFT JOIN {course} c ON c.id = t.course_id
-                  LEFT JOIN {assignment_tasks_courses} tc ON tc.task_id = t.id
-                  LEFT JOIN {course} c2 ON c2.id = tc.course_id";
+        $joins = "LEFT JOIN {course} c ON c.id = t.course_id";
         $where = "1=1";
+
+        if ($this->hasassignmenttaskscourses) {
+            $joins .= " LEFT JOIN {assignment_tasks_courses} tc ON tc.task_id = t.id
+                        LEFT JOIN {course} c2 ON c2.id = tc.course_id";
+        }
 
         if ($studentid > 0) {
             $joins .= " INNER JOIN {assignment_tasks_students} ts ON ts.task_id = t.id AND ts.user_id = :studentid";
@@ -98,10 +111,15 @@ class Assignment
             $liketerm = '%' . $this->DB->sql_like_escape($search) . '%';
             $params['searchname'] = $liketerm;
             $params['searchfullname'] = $liketerm;
-            $params['searchfullname2'] = $liketerm;
-            $where .= " AND (" . $this->DB->sql_like('t.name', ':searchname', false, false, false)
-                . " OR " . $this->DB->sql_like('c.fullname', ':searchfullname', false, false, false)
-                . " OR " . $this->DB->sql_like('c2.fullname', ':searchfullname2', false, false, false) . ")";
+            $searchconditions = [
+                $this->DB->sql_like('t.name', ':searchname', false, false, false),
+                $this->DB->sql_like('c.fullname', ':searchfullname', false, false, false),
+            ];
+            if ($this->hasassignmenttaskscourses) {
+                $params['searchfullname2'] = $liketerm;
+                $searchconditions[] = $this->DB->sql_like('c2.fullname', ':searchfullname2', false, false, false);
+            }
+            $where .= " AND (" . implode(' OR ', $searchconditions) . ")";
         }
 
         $sql = "SELECT t.id
@@ -153,13 +171,15 @@ class Assignment
             if (!empty($task->course)) {
                 $courses[(int)$task->course->id] = $task->course;
             }
-            $linked = $this->DB->get_records('assignment_tasks_courses', ['task_id' => $task->id], null, 'course_id');
-            if (!empty($linked)) {
-                $linkedcourseids = array_values(array_unique(array_map(function($r) { return (int)$r->course_id; }, $linked)));
-                if (!empty($linkedcourseids)) {
-                    $linkedcourses = $this->DB->get_records_list('course', 'id', $linkedcourseids, '', 'id, fullname, shortname');
-                    foreach ($linkedcourses as $lc) {
-                        $courses[(int)$lc->id] = $lc;
+            if ($this->hasassignmenttaskscourses) {
+                $linked = $this->DB->get_records('assignment_tasks_courses', ['task_id' => $task->id], null, 'course_id');
+                if (!empty($linked)) {
+                    $linkedcourseids = array_values(array_unique(array_map(function($r) { return (int)$r->course_id; }, $linked)));
+                    if (!empty($linkedcourseids)) {
+                        $linkedcourses = $this->DB->get_records_list('course', 'id', $linkedcourseids, '', 'id, fullname, shortname');
+                        foreach ($linkedcourses as $lc) {
+                            $courses[(int)$lc->id] = $lc;
+                        }
                     }
                 }
             }

@@ -26,7 +26,7 @@ if ($fCategory) {
 $careerpathrecords = $careerpathmanager->getCareerpaths($page, $perPage, $filters, $sort, $search);
 $careerpaths = [];
 foreach ($careerpathrecords as $careerpath) {
-    $course = $DB->get_record('course', ['id' => $careerpath->id], 'id, category, fullname, shortname', MUST_EXIST);
+    $course = $DB->get_record('course', ['id' => $careerpath->id], 'id, category, fullname, shortname, summary', MUST_EXIST);
     $resource = $coursemanager->courseResource($course);
     $resource->actionmenuid = 'careerpath-action-menu-' . $resource->id;
     $resource->pages = $pages;

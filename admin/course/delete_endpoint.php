@@ -8,7 +8,7 @@ require_login();
 require_sesskey();
 
 $courseid = required_param('id', PARAM_INT);
-$returnurl = new moodle_url('/theme/rainmake/admincareerpaths.php');
+$returnurl = new moodle_url('/theme/rainmake/admincourses.php');
 
 $systemcontext = context_system::instance();
 require_capability('moodle/course:create', $systemcontext);
@@ -21,7 +21,7 @@ $typesql = "SELECT *
                AND " . $DB->sql_compare_text('type') . " = :typevalue";
 $coursetype = $DB->get_record_sql($typesql, [
     'courseid' => $courseid,
-    'typevalue' => 'careerpath',
+    'typevalue' => 'course',
 ], IGNORE_MISSING);
 
 if (!$coursetype) {
@@ -99,8 +99,7 @@ if ($dbmanager->table_exists(new xmldb_table('assignment_tasks_curriculum'))) {
 $DB->delete_records('local_rainmake_backend_lecture_views', ['courseid' => $courseid]);
 $DB->delete_records('local_rainmake_backend_coursemeta', ['courseid' => $courseid]);
 $DB->delete_records('local_rainmake_backend_course_types', ['course_id' => $courseid]);
-$DB->delete_records('local_rainmake_backend_careerpath_courses', ['careerpath_id' => $courseid]);
-$DB->delete_records('local_rainmake_backend_careerpaths', ['id' => $courseid]);
+$DB->delete_records('local_rainmake_backend_careerpath_courses', ['course_id' => $courseid]);
 
 delete_course($course, false);
 
