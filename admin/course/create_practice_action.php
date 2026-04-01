@@ -3,6 +3,65 @@ require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->dirroot . '/course/lib.php');
 require_once(__DIR__ . '/../../classes/Practice.php');
 
+function deletePracticeAction(int $practiceid): void
+{
+    global $DB;
+
+    $questionids = $DB->get_fieldset_select(
+        'local_rainmake_backend_practice_questions',
+        'id',
+        'practice_id = :practiceid',
+        ['practiceid' => $practiceid]
+    );
+
+    if ($questionids) {
+        [$questionsinsql, $questionparams] = $DB->get_in_or_equal($questionids, SQL_PARAMS_NAMED);
+        $DB->delete_records_select(
+            'local_rainmake_backend_practice_question_options',
+            "question_id $questionsinsql",
+            $questionparams
+        );
+        $DB->delete_records_select(
+            'local_rainmake_backend_practice_answers',
+            "question_id $questionsinsql",
+            $questionparams
+        );
+        $DB->delete_records_select(
+            'local_rainmake_backend_practice_questions',
+            "id $questionsinsql",
+            $questionparams
+        );
+    }
+
+    $DB->delete_records('local_rainmake_backend_practice_answers', ['practice_id' => $practiceid]);
+
+    $gradeitemidnumber = 'local_rainmake_backend:practice:' . $practiceid;
+    $gradeitems = $DB->get_records_select(
+        'grade_items',
+        '(itemtype = :manualtype AND iteminstance = :manualpracticeid AND idnumber = :idnumber)
+         OR (itemtype = :modtype AND itemmodule = :itemmodule AND iteminstance = :modpracticeid)',
+        [
+            'manualtype' => 'manual',
+            'modtype' => 'mod',
+            'itemmodule' => 'rainmakepractice',
+            'manualpracticeid' => $practiceid,
+            'modpracticeid' => $practiceid,
+            'idnumber' => $gradeitemidnumber,
+        ],
+        '',
+        'id'
+    );
+
+    if ($gradeitems) {
+        $itemids = array_map(static fn($item) => (int)$item->id, $gradeitems);
+        [$itemsinsql, $itemparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
+        $DB->delete_records_select('grade_grades', "itemid $itemsinsql", $itemparams);
+        $DB->delete_records_select('grade_items', "id $itemsinsql", $itemparams);
+    }
+
+    $DB->delete_records('local_rainmake_backend_practices', ['id' => $practiceid]);
+}
+
 function createPracticeAction(?array $practices, string $courseid): void
 {
     global $DB;
@@ -12,6 +71,13 @@ function createPracticeAction(?array $practices, string $courseid): void
 
     try {
         foreach ($practices as $key => $practice) {
+            if ((bool)($practice['delete'] ?? false)) {
+                if (is_number($key)) {
+                    deletePracticeAction((int)$key);
+                }
+                continue;
+            }
+
             $practiceR = new stdClass();
             $practiceR->timecreated = time();
             $practiceR->courseid = $courseid;
